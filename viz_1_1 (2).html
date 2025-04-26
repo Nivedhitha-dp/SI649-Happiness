@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>4‑Day Workweek Well‑being Dashboard</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background: linear-gradient(to bottom right, #e0f7fa, #fafafa);
+      text-align: center;
+    }
+    #chart {
+      display: block;
+      margin: 0 auto;
+    }
+    .chart-title {
+      margin: 20px 0 5px;
+      font-size: 32px;
+      font-weight: bold;
+      color: #333;
+    }
+    .chart-subtitle {
+      margin-bottom: 30px;
+      font-size: 16px;
+      color: #666;
+    }
+    .tooltip {
+      position: absolute;
+      background: rgba(0,0,0,0.75);
+      color: #fff;
+      padding: 6px 10px;
+      border-radius: 4px;
+      pointer-events: none;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity .2s;
+    }
+    .grid line {
+      stroke: #ddd;
+      stroke-opacity: 0.7;
+      shape-rendering: crispEdges;
+    }
+    .bar {
+      filter: url(#drop-shadow);
+    }
+    .big-label {
+      font-size: 36px;
+      font-weight: bold;
+    }
+    .sub-label {
+      font-size: 14px;
+      fill: #555;
+    }
+  </style>
+</head>
+<body>
+  <div class="chart-title">Impact of 4‑Day Workweek on Employee Well‑being</div>
+  <div class="chart-subtitle">Source: 4dayweek.io “Employee Well‑being & Job Satisfaction”</div>
+  <svg id="chart"></svg>
+  <div class="tooltip" id="tooltip"></div>
+
+  <script>
+    // 1. 数据准备
+    const data = [
+      { metric: "Work–Life Balance ↑", value: 78 },
+      { metric: "Work‑Related Stress ↓", value: 33 },
+      { metric: "Negative Emotions ↓", value: 54 },
+      { metric: "Sick Leave ↓", value: 62 }
+    ];
+    const avg = d3.mean(data, d => d.value);
+
+    // 2. SVG & 坐标系
+    const svg = d3.select("#chart");
+    const tooltip = d3.select("#tooltip");
+    const margin = { top: 80, right: 40, bottom: 140, left: 60 };
+    const width = Math.min(900, window.innerWidth - 40) - margin.left - margin.right;
+    const height = 500 - margin.top - margin.bottom;
+
+    svg.attr("width",  width + margin.left + margin.right)
+       .attr("height", height + margin.top  + margin.bottom);
+
+    const defs = svg.append("defs");
+    // 阴影
+    defs.append("filter")
+      .attr("id", "drop-shadow")
+      .append("feDropShadow")
+        .attr("dx", 0).attr("dy", 2).attr("stdDeviation", 3)
+        .attr("flood-opacity", 0.3);
+    // 渐变
+    const grad = defs.append("linearGradient")
+      .attr("id", "bar-gradient")
+      .attr("x1","0%").attr("y1","0%")
+      .attr("x2","0%").attr("y2","100%");
+    grad.append("stop").attr("offset","0%").attr("stop-color","#fbc2eb");
+    grad.append("stop").attr("offset","100%").attr("stop-color","#a6c1ee");
+
+    // 3. 比例尺 & 容器
+    const x = d3.scaleBand()
+      .domain(data.map(d => d.metric))
+      .range([0, width])
+      .padding(0.3);
+    const y = d3.scaleLinear()
+      .domain([0,100]).nice()
+      .range([height,0]);
+
+    const g = svg.append("g")
+      .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // 4. 网格 & 轴
+    g.append("g")
+      .attr("class","grid")
+      .call(d3.axisLeft(y).ticks(6).tickSize(-width).tickFormat(""));
+
+    g.append("g")
+      .attr("transform",`translate(0,${height})`)
+      .call(d3.axisBottom(x).tickFormat(""));  // 隐藏 X 轴自带标签
+
+    g.append("g")
+      .call(d3.axisLeft(y).ticks(6).tickFormat(d=>d+"%"));
+
+    // 5. 绘制柱子
+    const bars = g.selectAll(".bar")
+      .data(data)
+      .enter().append("rect")
+        .attr("class","bar")
+        .attr("x", d=>x(d.metric))
+        .attr("y", y(0))
+        .attr("width", x.bandwidth())
+        .attr("height", 0)
+        .attr("fill","url(#bar-gradient)")
+        .on("mousemove", (e,d)=>{
+          const clean = d.metric.replace(/ ↑| ↓/, "");
+          const sign = d.metric.includes("↓") ? "−" : "+";
+          tooltip.style("opacity",1)
+                 .html(`<strong>${clean}</strong><br/><span>${sign}${d.value}%</span>`)
+                 .style("left", (e.pageX+10)+"px")
+                 .style("top",  (e.pageY-28)+"px");
+        })
+        .on("mouseout", ()=>tooltip.style("opacity",0));
+
+    // 6. 动画 & 自定义标签
+    bars.transition()
+      .delay((_,i)=>i*200)
+      .duration(1000)
+      .attr("y", d=>y(d.value))
+      .attr("height", d=>height - y(d.value))
+      .ease(d3.easeBounce)
+      .on("end", (_,i)=>{
+        const d = data[i];
+        const clean = d.metric.replace(/ ↑| ↓/, "");
+        const sign = d.metric.includes("↓") ? "−" : "+";
+        const color = d.metric.includes("↓") ? "#e74c3c" : "#27ae60";
+
+        // 大号带符号百分比
+        g.append("text")
+          .attr("class","big-label")
+          .attr("x", x(d.metric) + x.bandwidth()/2)
+          .attr("y", height + 50)
+          .attr("text-anchor","middle")
+          .attr("fill", color)
+          .text(`${sign}${d.value}%`);
+
+        // 完整指标名称
+        g.append("text")
+          .attr("class","sub-label")
+          .attr("x", x(d.metric) + x.bandwidth()/2)
+          .attr("y", height + 80)
+          .attr("text-anchor","middle")
+          .text(clean);
+      });
+
+    // 7. 平均线 & 标签
+    g.append("line")
+      .attr("x1",0).attr("x2",width)
+      .attr("y1",y(avg)).attr("y2",y(avg))
+      .attr("stroke","#888").attr("stroke-dasharray","5,5")
+      .raise();
+
+    g.append("text")
+      .attr("class","sub-label")
+      .attr("x", width).attr("y", y(avg)-10)
+      .attr("text-anchor","end")
+      .text(`Average: ${avg.toFixed(1)}%`)
+      .raise();
+
+    // 8. Y 轴标题
+    svg.append("text")
+      .attr("transform",`translate(${margin.left-45},${margin.top+height/2}) rotate(-90)`)
+      .attr("text-anchor","middle")
+      .style("font-size","14px")
+      .attr("fill","#555")
+      .text("Percentage (%)");
+  </script>
+</body>
+</html>

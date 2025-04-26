@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Gravity of Joy</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #ffffff;
+      color: #000000;
+    }
+    #title {
+      text-align: center;
+      font-size: 32px;
+      font-weight: 700;
+      padding: 1em 0 0.5em;
+      color: #333;
+    }
+    #magnetBar {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.5em;
+      padding: 0.5em 1em;
+    }
+    .magnet-button {
+      background: #ffffff;
+      border: 1px solid #ff5722;
+      color: #ff5722;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+    .magnet-button.active {
+      background: #ff5722;
+      color: white;
+    }
+    #vizContainer {
+      width: 100%;
+      height: calc(100vh - 160px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+      background: #f9f9f9;
+      display: block;
+    }
+    .magnet {
+      stroke: black;
+      stroke-width: 3px;
+      cursor: move;
+    }
+    .dust {
+      stroke: none;
+      opacity: 0.85;
+    }
+    .label {
+      font-size: 14px;
+      font-weight: bold;
+      text-anchor: middle;
+      fill: #000;
+      pointer-events: none;
+    }
+    .tooltip {
+      position: absolute;
+      background: #fff;
+      color: #000;
+      padding: 6px 10px;
+      border-radius: 4px;
+      font-size: 13px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .percentage-label {
+      font-size: 12px;
+      font-weight: bold;
+      fill: white;
+      pointer-events: none;
+      text-anchor: middle;
+      dominant-baseline: middle;
+    }
+  </style>
+</head>
+<body>
+  <div id="title">The Gravity of Joy</div>
+  <div id="magnetBar"></div>
+  <div id="vizContainer">
+    <svg></svg>
+  </div>
+  <div id="tooltip" class="tooltip"></div>
+<script>
+const width = window.innerWidth;
+const height = window.innerHeight - 160;
+const svg = d3.select("svg");
+const tooltip = d3.select("#tooltip");
+
+let allMagnets = new Set();
+let activeMagnets = [];
+let simulation;
+const colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+const magnetColors = {};
+let particlesGlobal = [];
+
+fetch("happiness_particles_2000.json")
+  .then(res => res.json())
+  .then(data => {
+    const particles = data.happiness_particles;
+    particlesGlobal = particles;
+
+    particles.forEach(d => d.magnets.forEach(m => allMagnets.add(m)));
+    allMagnets = Array.from(allMagnets);
+
+    const magnetBar = d3.select("#magnetBar");
+    magnetBar.selectAll("button")
+      .data(allMagnets)
+      .enter()
+      .append("button")
+      .attr("class", "magnet-button")
+      .text(d => d)
+      .on("click", function(event, d) {
+        const index = activeMagnets.findIndex(m => m.id === d);
+        if (index === -1) {
+          const color = colorScale(d);
+          magnetColors[d] = color;
+          activeMagnets.push({ id: d, x: Math.random() * width, y: Math.random() * height, color });
+          d3.select(this).classed("active", true);
+        } else {
+          delete magnetColors[d];
+          activeMagnets.splice(index, 1);
+          d3.select(this).classed("active", false);
+        }
+        renderMagnets();
+        simulation.alpha(1).restart();
+      });
+
+    particles.forEach(d => {
+      d.x = Math.random() * width;
+      d.y = Math.random() * height;
+    });
+
+    const dust = svg.selectAll(".dust")
+      .data(particles)
+      .enter()
+      .append("circle")
+      .attr("class", "dust")
+      .attr("r", 6)
+      .attr("fill", "#ccc")
+      .on("mouseover", (event, d) => {
+        tooltip.style("opacity", 1).html(d.quote);
+      })
+      .on("mousemove", (event) => {
+        tooltip.style("left", (event.pageX + 10) + "px")
+               .style("top", (event.pageY - 10) + "px");
+      })
+      .on("mouseout", () => {
+        tooltip.style("opacity", 0);
+      });
+
+    simulation = d3.forceSimulation(particles)
+      .force("collide", d3.forceCollide(6))
+      .force("magnet", () => {
+        for (let d of particles) {
+          let linked = activeMagnets.filter(m => d.magnets.includes(m.id));
+          if (linked.length === 0 && activeMagnets.length > 0) {
+            linked = [activeMagnets[d.id % activeMagnets.length]];
+          }
+          if (linked.length) {
+            const fx = d3.mean(linked, m => m.x);
+            const fy = d3.mean(linked, m => m.y);
+            d.vx += (fx - d.x) * 0.0015;
+            d.vy += (fy - d.y) * 0.0015;
+            d.color = linked[0].color;
+          }
+        }
+      })
+      .alphaDecay(0.01)
+      .on("tick", () => {
+        svg.selectAll("circle.dust")
+          .attr("cx", d => d.x)
+          .attr("cy", d => d.y)
+          .attr("fill", d => d.color || "#ccc");
+
+        const groups = svg.selectAll("g.magnet-group")
+          .data(activeMagnets, d => d.id);
+
+        groups.select("text.percentage-label")
+          .text(d => {
+            const count = particlesGlobal.filter(p => p.color === d.color).length;
+            d._percent = count / particlesGlobal.length;
+            return `${Math.round(d._percent * 100)}%`;
+          });
+
+        const maxPercent = d3.max(activeMagnets, m => m._percent || 0);
+        const minPercent = d3.min(activeMagnets, m => m._percent || 0);
+        const sizeScale = d3.scaleSqrt().domain([minPercent, maxPercent]).range([22, 60]);
+
+        groups.select("circle.magnet")
+          .transition()
+          .duration(300)
+          .ease(d3.easeCubicOut)
+          .attr("r", d => sizeScale(d._percent || 0));
+
+        groups.attr("transform", d => `translate(${d.x}, ${d.y})`);
+      });
+
+    function renderMagnets() {
+      const magnetGroup = svg.selectAll("g.magnet-group")
+        .data(activeMagnets, d => d.id);
+
+      const enter = magnetGroup.enter()
+        .append("g")
+        .attr("class", "magnet-group")
+        .on("mouseover", (event, d) => {
+          const count = particlesGlobal.filter(p => p.color === d.color).length;
+          tooltip.style("opacity", 1).html(`<strong>${d.id}</strong><br>${count} attracted particles`);
+        })
+        .on("mousemove", (event) => {
+          tooltip.style("left", (event.pageX + 10) + "px")
+                 .style("top", (event.pageY - 10) + "px");
+        })
+        .on("mouseout", () => tooltip.style("opacity", 0))
+        .call(d3.drag()
+          .on("start", (event, d) => { d.fx = d.x; d.fy = d.y; })
+          .on("drag", (event, d) => {
+            d.fx = d.x = event.x;
+            d.fy = d.y = event.y;
+            simulation.alpha(1).restart();
+          })
+        );
+
+      enter.append("circle")
+        .attr("class", "magnet")
+        .attr("r", 20)
+        .attr("fill", d => d.color);
+
+      enter.append("text")
+        .attr("class", "percentage-label")
+        .attr("dy", "0.3em")
+        .text(d => "0%");
+
+      enter.append("rect")
+        .attr("class", "label-bg")
+        .attr("rx", 4)
+        .attr("ry", 4)
+        .attr("fill", "#ffffff")
+        .attr("stroke", d => d.color)
+        .attr("stroke-width", 2)
+        .attr("x", d => -d.id.length * 4.5)
+        .attr("y", -44)
+        .attr("width", d => d.id.length * 9)
+        .attr("height", 20);
+
+      enter.append("text")
+        .attr("class", "label")
+        .attr("dy", -30)
+        .text(d => d.id);
+
+      magnetGroup.exit().remove();
+    }
+  });
+</script>
+</body>
+</html>

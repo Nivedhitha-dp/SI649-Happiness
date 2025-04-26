@@ -1,0 +1,400 @@
+{
+  "nodes": [
+    {
+      "name": "Consulting"
+    },
+    {
+      "name": "Manufacturing"
+    },
+    {
+      "name": "Healthcare"
+    },
+    {
+      "name": "Logistics"
+    },
+    {
+      "name": "Construction"
+    },
+    {
+      "name": "Finance"
+    },
+    {
+      "name": "Media"
+    },
+    {
+      "name": "Tech"
+    },
+    {
+      "name": "Law"
+    },
+    {
+      "name": "Academia"
+    },
+    {
+      "name": "Design"
+    },
+    {
+      "name": "Utilities"
+    },
+    {
+      "name": "Education"
+    },
+    {
+      "name": "Retail"
+    },
+    {
+      "name": "Hospitality"
+    },
+    {
+      "name": "E-commerce"
+    },
+    {
+      "name": "Remote"
+    },
+    {
+      "name": "Physical"
+    },
+    {
+      "name": "Hybrid: 2 days physical, 3 days remote"
+    },
+    {
+      "name": "Hybrid: 3 days physical, 2 days remote"
+    },
+    {
+      "name": "Hybrid: Flexible (based on need)"
+    },
+    {
+      "name": "Company Policy"
+    },
+    {
+      "name": "Security and Compliance"
+    },
+    {
+      "name": "Remote Tools Are Sufficient"
+    },
+    {
+      "name": "High Commute Time"
+    },
+    {
+      "name": "Better Work-Life Balance"
+    },
+    {
+      "name": "Job Requires Physical Presence"
+    },
+    {
+      "name": "Need for Face-to-Face Collaboration"
+    }
+  ],
+  "links": [
+    {
+      "source": 0,
+      "target": 16,
+      "value": 4
+    },
+    {
+      "source": 0,
+      "target": 17,
+      "value": 2
+    },
+    {
+      "source": 0,
+      "target": 18,
+      "value": 4
+    },
+    {
+      "source": 1,
+      "target": 16,
+      "value": 5
+    },
+    {
+      "source": 1,
+      "target": 17,
+      "value": 5
+    },
+    {
+      "source": 1,
+      "target": 18,
+      "value": 9
+    },
+    {
+      "source": 2,
+      "target": 16,
+      "value": 6
+    },
+    {
+      "source": 2,
+      "target": 17,
+      "value": 6
+    },
+    {
+      "source": 2,
+      "target": 18,
+      "value": 9
+    },
+    {
+      "source": 3,
+      "target": 17,
+      "value": 6
+    },
+    {
+      "source": 3,
+      "target": 18,
+      "value": 2
+    },
+    {
+      "source": 3,
+      "target": 16,
+      "value": 4
+    },
+    {
+      "source": 4,
+      "target": 17,
+      "value": 4
+    },
+    {
+      "source": 4,
+      "target": 18,
+      "value": 5
+    },
+    {
+      "source": 4,
+      "target": 19,
+      "value": 2
+    },
+    {
+      "source": 5,
+      "target": 16,
+      "value": 6
+    },
+    {
+      "source": 5,
+      "target": 17,
+      "value": 4
+    },
+    {
+      "source": 5,
+      "target": 18,
+      "value": 3
+    },
+    {
+      "source": 6,
+      "target": 16,
+      "value": 3
+    },
+    {
+      "source": 6,
+      "target": 18,
+      "value": 3
+    },
+    {
+      "source": 7,
+      "target": 16,
+      "value": 9
+    },
+    {
+      "source": 7,
+      "target": 18,
+      "value": 5
+    },
+    {
+      "source": 7,
+      "target": 19,
+      "value": 4
+    },
+    {
+      "source": 8,
+      "target": 16,
+      "value": 4
+    },
+    {
+      "source": 8,
+      "target": 17,
+      "value": 2
+    },
+    {
+      "source": 8,
+      "target": 18,
+      "value": 1
+    },
+    {
+      "source": 9,
+      "target": 16,
+      "value": 3
+    },
+    {
+      "source": 9,
+      "target": 17,
+      "value": 1
+    },
+    {
+      "source": 9,
+      "target": 18,
+      "value": 1
+    },
+    {
+      "source": 10,
+      "target": 16,
+      "value": 4
+    },
+    {
+      "source": 10,
+      "target": 17,
+      "value": 2
+    },
+    {
+      "source": 10,
+      "target": 18,
+      "value": 1
+    },
+    {
+      "source": 11,
+      "target": 16,
+      "value": 3
+    },
+    {
+      "source": 11,
+      "target": 17,
+      "value": 2
+    },
+    {
+      "source": 11,
+      "target": 18,
+      "value": 2
+    },
+    {
+      "source": 12,
+      "target": 16,
+      "value": 3
+    },
+    {
+      "source": 12,
+      "target": 17,
+      "value": 1
+    },
+    {
+      "source": 12,
+      "target": 19,
+      "value": 1
+    },
+    {
+      "source": 13,
+      "target": 16,
+      "value": 3
+    },
+    {
+      "source": 13,
+      "target": 18,
+      "value": 3
+    },
+    {
+      "source": 14,
+      "target": 17,
+      "value": 3
+    },
+    {
+      "source": 14,
+      "target": 19,
+      "value": 1
+    },
+    {
+      "source": 15,
+      "target": 16,
+      "value": 3
+    },
+    {
+      "source": 15,
+      "target": 17,
+      "value": 1
+    },
+    {
+      "source": 15,
+      "target": 18,
+      "value": 2
+    },
+    {
+      "source": 16,
+      "target": 21,
+      "value": 12
+    },
+    {
+      "source": 16,
+      "target": 22,
+      "value": 15
+    },
+    {
+      "source": 16,
+      "target": 23,
+      "value": 20
+    },
+    {
+      "source": 16,
+      "target": 24,
+      "value": 9
+    },
+    {
+      "source": 16,
+      "target": 25,
+      "value": 8
+    },
+    {
+      "source": 17,
+      "target": 21,
+      "value": 6
+    },
+    {
+      "source": 17,
+      "target": 22,
+      "value": 5
+    },
+    {
+      "source": 17,
+      "target": 26,
+      "value": 9
+    },
+    {
+      "source": 17,
+      "target": 24,
+      "value": 8
+    },
+    {
+      "source": 17,
+      "target": 27,
+      "value": 9
+    },
+    {
+      "source": 18,
+      "target": 21,
+      "value": 4
+    },
+    {
+      "source": 18,
+      "target": 23,
+      "value": 9
+    },
+    {
+      "source": 18,
+      "target": 24,
+      "value": 6
+    },
+    {
+      "source": 18,
+      "target": 25,
+      "value": 7
+    },
+    {
+      "source": 19,
+      "target": 21,
+      "value": 1
+    },
+    {
+      "source": 19,
+      "target": 22,
+      "value": 1
+    },
+    {
+      "source": 19,
+      "target": 24,
+      "value": 2
+    }
+  ]
+}

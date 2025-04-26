@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Remote Work vs Physical (2020 -> 2021)</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f4f6f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .card-container {
+      position: relative;
+      width: 73%;
+      height: 100vh;
+      overflow: hidden;
+      padding-top: 3.5rem;
+    }
+
+    .title {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      text-align: center;
+      font-size: 28px;
+      font-weight: bold;
+      padding: 1rem 0;
+      background: #fef9f0;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .info-panel {
+      width: 27%;
+      padding: 2rem 1.8rem;
+      background: #fef9f0;
+      border-left: 1px solid #ddd;
+      overflow-y: auto;
+      font-size: 15px;
+      line-height: 1.6;
+      transition: all 0.4s ease;
+    }
+
+    .info-panel.fade {
+      animation: fadeIn 0.4s;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .info-panel h2 {
+      font-size: 22px;
+      margin-top: 0;
+    }
+
+    .info-panel ul {
+      padding-left: 20px;
+      margin: 0.3rem 0 1rem;
+    }
+
+    .info-panel .section {
+      margin-bottom: 1.6rem;
+    }
+    .info-panel p {
+  font-size: 16px;
+  color: #090d11;
+  padding: 1.2rem;
+  border-radius: 12px;
+  background: #b9c0c0;
+  border: 1px dashed #88a;
+  text-align: center;
+  margin-top: 2rem;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+    .info-panel .section strong {
+      display: inline-block;
+      margin-bottom: 0.4rem;
+      color: #37474f;
+      font-size: 15px;
+      text-transform: uppercase;
+    }
+
+    .gender-bar {
+      display: flex;
+      height: 20px;
+      width: 100%;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-top: 0.4rem;
+      margin-bottom: 0.6rem;
+      background: #e0e0e0;
+      box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .gender-bar .female {
+      background-color: #f48fb1;
+    }
+
+    .gender-bar .male {
+      background-color: #90caf9;
+    }
+
+    .gender-labels {
+      font-size: 14px;
+      display: flex;
+      justify-content: space-between;
+      color: #444;
+    }
+
+    .card {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+      padding: 0.75rem;
+      text-align: center;
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .card.selected {
+      border: 3px solid #2196f3;
+      box-shadow: 0 0 10px rgba(33, 150, 243, 0.6);
+      z-index: 20;
+    }
+
+    .emoji {
+      font-size: 32px;
+      margin-bottom: 0.4rem;
+    }
+
+    .industry {
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .metric {
+      font-size: 11.5px;
+      margin-bottom: 0.2rem;
+    }
+
+    .change {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="card-container" id="cards">
+    <div class="title">Remote Work vs Physical (2020 -> 2021)</div>
+  </div>
+  <div class="info-panel" id="info">
+    <p>Click a bubble to view details here.</p>
+  </div>
+
+  <script>
+    const data = [
+      { Industry: "Software & IT Services", Remote_2020: 12.5, Remote_2021: 30.0, emoji: "💻", inPerson: ["Team brainstorming", "Hardware setup"], remote: ["Coding", "Virtual meetings", "Support tickets"], shiftedTasks: [{ task: "Daily standups", reason: "Better team productivity on Zoom" }], genderSplit: { female: 35, male: 65 } },
+      { Industry: "Media & Communications", Remote_2020: 12.5, Remote_2021: 21.3, emoji: "📰", inPerson: ["On-field reporting", "Studio work"], remote: ["Editing", "Content writing", "PR outreach"], shiftedTasks: [{ task: "Interviews", reason: "Easier scheduling via Zoom" }], genderSplit: { female: 52, male: 48 } },
+      { Industry: "Wellness & Fitness", Remote_2020: 3.3, Remote_2021: 21.2, emoji: "🏋️", inPerson: ["Physical training", "Gym supervision"], remote: ["Virtual classes", "Nutrition counseling"], shiftedTasks: [{ task: "Yoga sessions", reason: "Video streaming tools enabled home practice" }], genderSplit: { female: 60, male: 40 } },
+      { Industry: "Healthcare", Remote_2020: 3.2, Remote_2021: 14.4, emoji: "🩺", inPerson: ["Emergency care", "Surgeries"], remote: ["Teleconsultation", "Prescription renewals"], shiftedTasks: [{ task: "Initial consultations", reason: "Telehealth adoption post-COVID" }], genderSplit: { female: 68, male: 32 } },
+      { Industry: "Nonprofit", Remote_2020: 4.6, Remote_2021: 14.1, emoji: "❤️", inPerson: ["Fundraisers", "Community events"], remote: ["Grant writing", "Volunteer coordination"], shiftedTasks: [{ task: "Workshops", reason: "Moved to Zoom for wider accessibility" }], genderSplit: { female: 58, male: 42 } },
+      { Industry: "Hardware & Networking", Remote_2020: 2.2, Remote_2021: 12.9, emoji: "🔌", inPerson: ["Assembly", "Device testing"], remote: ["Technical documentation", "Customer support"], shiftedTasks: [{ task: "Team meetings", reason: "Shifted to remote due to logistics" }], genderSplit: { female: 22, male: 78 } },
+      { Industry: "Corporate Services", Remote_2020: 5.2, Remote_2021: 9.5, emoji: "🏢", inPerson: ["Board meetings", "Client presentations"], remote: ["HR support", "Invoicing", "Admin work"], shiftedTasks: [{ task: "Weekly reporting", reason: "Efficient file sharing systems" }], genderSplit: { female: 49, male: 51 } },
+      { Industry: "Education", Remote_2020: 9.4, Remote_2021: 8.8, emoji: "📚", inPerson: ["Classroom teaching", "Lab sessions"], remote: ["Lectures", "Assignments & feedback"], shiftedTasks: [{ task: "Learning", reason: "Partially post covid, school reopen" }], genderSplit: { female: 61, male: 39 } },
+      { Industry: "Entertainment", Remote_2020: 3.0, Remote_2021: 7.7, emoji: "🎭", inPerson: ["Live performances", "Filming"], remote: ["Script writing", "Editing"], shiftedTasks: [{ task: "Auditions", reason: "Virtual casting calls via video submissions" }], genderSplit: { female: 50, male: 50 } },
+      { Industry: "Finance", Remote_2020: 1.8, Remote_2021: 6.5, emoji: "💰", inPerson: ["Client consultations", "Board reviews"], remote: ["Data analysis", "Accounting", "Reporting"], shiftedTasks: [{ task: "Financial planning", reason: "Secure cloud-based tools" }], genderSplit: { female: 48, male: 52 } },
+      { Industry: "Consumer Goods", Remote_2020: 2.2, Remote_2021: 6.0, emoji: "🛍️", inPerson: ["Packaging", "Product testing"], remote: ["Marketing", "Customer surveys"], shiftedTasks: [{ task: "Team check-ins", reason: "Remote syncs via Slack/Zoom" }], genderSplit: { female: 47, male: 53 } },
+      { Industry: "Recreation & Travel", Remote_2020: 0.2, Remote_2021: 3.7, emoji: "✈️", inPerson: ["Tours", "Guest service"], remote: ["Booking support", "Travel planning"], shiftedTasks: [{ task: "Travel advisory", reason: "Live chat and online booking systems" }], genderSplit: { female: 54, male: 46 } },
+      { Industry: "Manufacturing", Remote_2020: 1.4, Remote_2021: 3.0, emoji: "🏭", inPerson: ["Production line", "Quality check"], remote: ["Logistics coordination", "Inventory reports"], shiftedTasks: [{ task: "Supplier calls", reason: "Video conferencing integration" }], genderSplit: { female: 30, male: 70 } },
+      { Industry: "Energy & Mining", Remote_2020: 1.0, Remote_2021: 2.7, emoji: "⚡", inPerson: ["Field work", "Equipment maintenance"], remote: ["Data analysis", "Environmental reporting"], shiftedTasks: [{ task: "Safety briefings", reason: "Online compliance platforms" }], genderSplit: { female: 18, male: 82 } },
+      { Industry: "Retail", Remote_2020: 0.5, Remote_2021: 0.7, emoji: "🛒", inPerson: ["Store management", "Customer service"], remote: ["Online order handling", "Support chat"], shiftedTasks: [{ task: "Inventory sync", reason: "E-commerce growth" }], genderSplit: { female: 55, male: 45 } }
+    ];
+
+    const container = d3.select("#cards");
+    const infoPanel = document.getElementById("info");
+    const screenWidth = window.innerWidth;
+    const panelWidth = screenWidth * 0.27;
+    const chartWidth = screenWidth * 0.73;
+    const chartHeight = window.innerHeight - 100;
+
+    const nodes = data.map(d => {
+      const change = d.Remote_2021 - d.Remote_2020;
+      const radius = 80 + Math.abs(change) * 4;
+//       const cardColor = change >= 0 ? '#c8e6c9' : '#ffebee';
+// const textColor = change >= 0 ? '#1b5e20' : '#c62828';
+const cardColor = change >= 0 ? '#c8e6c9' : '#ffcdd2';
+const textColor = change >= 0 ? '#1b5e20' : '#b71c1c';
+
+    //   const cardColor = change >= 0 ? '#e8f5e9' : '#ffebee';
+    //   const textColor = change >= 0 ? '#2e7d32' : '#c62828';
+
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.width = `${radius * 2}px`;
+      card.style.height = `${radius * 2}px`;
+      card.style.background = cardColor;
+
+      card.innerHTML = `
+        <div class="emoji">${d.emoji}</div>
+        <div class="industry">${d.Industry}</div>
+        <div class="metric">2020 Remote: ${d.Remote_2020}%</div>
+        <div class="metric">2021 Remote: ${d.Remote_2021}%</div>
+        <div class="metric change" style="color: ${textColor};">∆ ${(change).toFixed(1)} pts</div>
+      `;
+
+      card.onclick = () => {
+        document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        showDetails(d);
+      };
+
+      container.node().appendChild(card);
+
+      return {
+        radius,
+        x: Math.random() * (chartWidth - panelWidth - radius * 2),
+        y: Math.random() * (chartHeight - 2 * radius) + 80,
+        element: card
+      };
+    });
+
+    d3.forceSimulation(nodes)
+      .force("center", d3.forceCenter(chartWidth / 2.5, chartHeight / 2))
+      .force("charge", d3.forceManyBody().strength(0))
+      .force("collision", d3.forceCollide().radius(d => d.radius + 10))
+      .on("tick", () => {
+        nodes.forEach(d => {
+          const maxX = chartWidth - d.radius;
+          const minX = d.radius;
+          const maxY = chartHeight - d.radius;
+          const minY = d.radius + 60;
+
+          d.x = Math.max(minX, Math.min(maxX, d.x));
+          d.y = Math.max(minY, Math.min(maxY, d.y));
+
+          d.element.style.transform = `translate(${d.x - d.radius}px, ${d.y - d.radius}px)`;
+        });
+      });
+
+    function showDetails(industry) {
+      infoPanel.classList.remove('fade');
+      void infoPanel.offsetWidth; // trigger reflow to restart animation
+      infoPanel.classList.add('fade');
+
+      const female = industry.genderSplit.female;
+      const male = industry.genderSplit.male;
+
+      infoPanel.innerHTML = `
+        <h2>${industry.emoji} ${industry.Industry}</h2>
+        <div class="section">
+          <strong>In-Person Tasks:</strong>
+          <ul>${industry.inPerson.map(t => `<li>${t}</li>`).join("")}</ul>
+        </div>
+        <div class="section">
+          <strong>Remote Tasks:</strong>
+          <ul>${industry.remote.map(t => `<li>${t}</li>`).join("")}</ul>
+        </div>
+        <div class="section">
+          <strong>Shifted to Remote in 2021:</strong>
+          <ul>${industry.shiftedTasks.map(s => `<li><em>${s.task}</em> → ${s.reason}</li>`).join("")}</ul>
+        </div>
+        <div class="section">
+          <strong>Gender Split:</strong>
+          <div class="gender-bar">
+            <div class="female" style="width: ${female}%;"></div>
+            <div class="male" style="width: ${male}%;"></div>
+          </div>
+          <div class="gender-labels">
+            <span>👩 Female: ${female}%</span>
+            <span>👨 Male: ${male}%</span>
+          </div>
+        </div>
+      `;
+    }
+  </script>
+</body>
+</html>
